@@ -1,0 +1,30 @@
+- data: information stored in form of numbers, characters and special characters.
+- databases: a structure filled with data/information which is easy to access and understand.
+- server: hardware+software responsible for storing, managing data
+
+- data connectivity: ability to connect clients and servers, securing the swift and volumious
+	transfer of data.
+
+- API: Application Programming Interface
+(let's devices and software applications to communicate in real time)
+for eg: messenger
+	-	Application
+	-	Programming 
+	-	Interface
+
+.json: javascript object notation
+.txt
+.csv
+
+SQL: store, organize and manipulate data
+Python: make calculations, statistical analysis tools and make predictions
+Tableau: plot results, deliver meaningful representations
+
+driver: piece of software that mediates between two entities, drive a certain software product
+
+Absenteeism: absence from work during normal working hrs, resulting in temporary incapacity to execute
+	regular working actitvity
+
+Terms with different meanings in maths, data analytics and programming
+Variable in data analytics: feature or attribute
+Vector and matrix in mathematics are referred as arrays in programming.

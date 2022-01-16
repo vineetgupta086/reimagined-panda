@@ -1,0 +1,1 @@
+"Tokyo","Jakarta","Delhi","Manila","Seoul","Shanghai","Karachi","Beijing","New York","Guangzhou","Sao Paulo","Mexico City","Mumbai","Kyoto","Moscow","Dhaka","Cairo","Los Angeles","Bangkok","Kolkata"

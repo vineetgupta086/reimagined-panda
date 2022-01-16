@@ -1,0 +1,102 @@
+---
+title: 'Iris: Data Manipulation + Visualization'
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+  word_document: default
+---
+
+Edgar Anderson's Iris Data
+Description
+This famous (Fisher's or Anderson's) iris data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
+
+```{r}
+head(iris)
+str(iris)
+#libraries:
+library(MASS)
+library(dplyr)
+library(ggplot2)
+library(magrittr) #%>% operator
+library(tidyr)
+```
+iris is a data frame with 150 cases (rows) and 5 variables (columns) named Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, and Species.
+We rearrange columns for better aesthetics of the data, and it would be helpful when we tidy data.
+```{R}
+str(iris)
+#rearranging columns
+iris1<-iris[c(5,1:4)]
+str(iris1)
+```
+The principles of tidy data provide a standard way to organise data values within a dataset. A standard makes initial data cleaning easier because you don’t need to start from scratch and reinvent the wheel every time. The tidy data standard has been designed to facilitate initial exploration and analysis of the data, and to simplify the development of data analysis tools that work well together.
+In R, we can use the library: tidyr for data cleaning,
+```{R}
+library(tidyr)
+#tidying data using tidyr
+iris.tidy <- iris1 %>%
+  gather(key, Value, -Species) %>%
+  separate(key, c("Part", "Measure"), "\\.")
+str(iris.tidy)
+```
+
+This is just a small instance of data tidying that I've used to skip the manual steps it takes to tidy data using data manipulation functions provided in the library: dplyr.
+For beginners, I have shown how data manipulation can be done manually in the following code chunk.
+```{R}
+library(dplyr)
+library(magrittr)
+
+#import data
+iris<-read.csv("datasets/iris.csv")
+#Separating sepal data
+iris1a<-iris %>%
+  mutate(Part="Sepal") %>%
+  select(Species,Part,Sepal.Length,Sepal.Width) %>%
+  rename(Length=Sepal.Length,Width=Sepal.Width)
+#Separating petal data
+iris1b<-iris %>%
+  mutate(Part="Petal") %>%
+  select(Species,Part,Petal.Length,Petal.Width) %>%
+  rename(Length=Petal.Length,Width=Petal.Width)
+#Combining sepal and petal data
+iris2<-rbind(iris1a,iris1b)
+iris2a<-iris2 %>%
+  mutate(Measure="Length") %>%
+  select(Species,Part,Measure,Length) %>%
+  rename(Value=Length)
+iris2b<-iris2 %>%
+  mutate(Measure="Width") %>%
+  select(Species,Part,Measure,Width) %>%
+  rename(Value=Width)
+iris3<-rbind(iris2a,iris2b)
+```
+
+Now, we are at the step where we visualize the data we cleaned.
+The data interpretation can be difficult in the following graph as we can't really interpret anything useful.
+
+
+```{R}
+ggplot(data = iris,aes(x=Sepal.Length,y=Sepal.Width,col=Species))+
+  geom_jitter()
+```
+
+The second graph is more visually pleasing as there isn't a mix up of different species and we can even conclude a strong correlation for measure of Petals depending on the species.
+
+```{R}
+ggplot(data = iris,aes(x=Petal.Length,y=Petal.Width,col=Species))+
+  geom_jitter()
+```
+
+The plots in the graphs aren't accurate because we used the function geom_jitter
+Funtion geom_point() maps the data as it is, but geom_jitter() adds a little variance to data
+for better representation in several cases and avoid overlapping of same values.
+
+In the next graph we are going to use a function facet_grid() which would make the visualization experience more aesthetic and easier to interpret.
+
+```{R}
+ggplot(data=iris.tidy,aes(x=Measure,y=Value,col=Species))+
+  geom_jitter()+
+  facet_grid(.~Part)
+
+```

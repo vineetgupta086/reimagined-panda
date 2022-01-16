@@ -1,0 +1,144 @@
+---
+title: "COVID-19 Time Series Forecasting (India)"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  word_document: default
+---
+Objective:
+The objective of this project is to analyse the time-series of SARS-CoV-2/Covid-19 confirmed and death cases and study the trends to forecast expected future trends in India.
+
+About Covid-19:
+What is corona virus Corona viruses are a large family of viruses which may cause illness in animals or humans. In humans, several coronaviruses are known to cause respiratory infections ranging from the common cold to more severe diseases such as Middle East Respiratory Syndrome (MERS) and Severe Acute Respiratory Syndrome (SARS). The most recently discovered coronavirus causes coronavirus disease COVID-19. 
+COVID-19 is the infectious disease caused by the most recently discovered corona virus. This new virus and disease were unknown before the outbreak began in Wuhan, China, in December 2019.
+
+Summary:
+I have scrapped data off of a third party source, till 31-December-2020, and will be forecasting number for the month January-2021 
+
+The following libraries were used:
+```{r}
+#libraries
+library(openxlsx) #xsls file
+library(dplyr)
+library(ggplot2)
+```
+
+Raw data is imported and manipulated as per requirements.
+We ensure that the datatype in the imported file is interpreted exactly as what it was before, or at least what we want it to be interpreted as.
+```{R}
+#processing raw data
+oct_data=read.xlsx("datasets/conf_new_oct.xlsx",sheet = 1,startRow = 1,colNames = T,rowNames = F,detectDates = T)
+nov_data=read.xlsx("datasets/conf_new_nov.xlsx",sheet = 1,startRow = 1,colNames = T,rowNames = F,detectDates = T)
+oct_data[,1]<-as.Date(oct_data[,1])
+class(oct_data[,1])
+```
+
+For now we do not use data_nov as it will be later used to compare to the model
+```{R}
+conf<-as.ts(oct_data$Confirmed)
+plot.ts(conf,xlim=c(50,320),ylim=c(0,100000))
+```
+
+The data begins from 22-Jan-2020 and the x axis is the number of days after the date. The values start to show trends after about 60 days so the graph is cropped.
+
+```{R}
+summary(conf)
+```
+
+Now we are going to fit an Autoregressive model for the data, 
+store predicted values and standard error values.
+Standard error values will be used to create a confidence interval of 95%.
+
+```{R}
+ar_conf<-arima(conf,order=c(1,0,0)) #autoregression model
+ar_pred<-predict(ar_conf,n.ahead=30)$pred
+ar_se<-predict(ar_conf,n.ahead=30)$se
+```
+
+CONFIRMED CASES PREDICTION
+
+The following few graphs show how data of confirmed cases can be used to predict for next month and comparison of the same is shown with the actual data of November.
+
+Actual data of confirmed cases till October end.
+```{R}
+plot.ts(conf,xlim=c(50,320),main="Autoregression Model")
+```
+
+Predicted values are added to the graph.
+```{R}
+plot.ts(conf,xlim=c(50,320),main="Autoregression Model")
+points(ar_pred,type='l',col="blue",lwd=3)
+```
+
+Confidence interval of 95% is represented by the area bordered by the red dotted-line. The basis is standard error and for farther dates, there is scope for more standard errir than that of closer dates.
+```{R}
+plot.ts(conf,xlim=c(50,320),main="Autoregression Model")
+points(ar_pred,type='l',col="blue",lwd=3)
+points(ar_pred-ar_se,type='l',col="red",lty=2); points(ar_pred+ar_se,type='l',col="red",lty=2)
+```
+
+Finally we're comparing the actual data of November with that of the predicted region of values.
+```{R}
+plot.ts(conf,xlim=c(50,320),main="Autoregression Model")
+points(ar_pred,type='l',col="blue",lwd=3)
+points(ar_pred-ar_se,type='l',col="red",lty=2); points(ar_pred+ar_se,type='l',col="red",lty=2)
+points(nov_data,type='l')
+```
+
+
+Removing all the data that we don't need to deal with further.
+```{R}
+rm(list=ls(pattern='^conf|^ar|new$|data$'))
+```
+
+DEATHS PREDICTION
+
+Importing data for deaths.
+```{R}
+oct_data2=read.xlsx("datasets/dead_new_oct.xlsx",sheet = 1,startRow = 1,colNames = T,rowNames = F,detectDates = T)
+nov_data2=read.xlsx("datasets/dead_new_nov.xlsx",sheet = 1,startRow = 1,colNames = T,rowNames = F,detectDates = T)
+oct_data2[,1]<-as.Date(oct_data2[,1])
+```
+```{R}
+dead_new<-as.ts(oct_data2$Deaths)
+plot(dead_new,ylim=c(0,2000),xlim=c(50,300))
+```
+
+```{R}
+ar_dead<-arima(dead_new,order=c(1,0,0))
+ar_pred<-predict(ar_dead,n.ahead=30)$pred
+ar_se<-predict(ar_dead,n.ahead=30)$se
+```
+
+The following few graphs show how data of deaths can be used to predict for next month and comparison of the same is shown with the actual data of November.
+
+Actual data of deaths till October end.
+```{R}
+plot.ts(dead_new,xlim=c(50,320),main="Autoregression Model")
+```
+
+Predicted values are added to the graph.
+```{R}
+plot.ts(dead_new,xlim=c(50,320),main="Autoregression Model")
+points(ar_pred,type='l',col="blue",lwd=3)
+```
+
+Confidence interval of 95% is represented by the area bordered by the red dotted-line. The basis is standard error and for farther dates, there is scope for more standard errir than that of closer dates.
+```{R}
+plot.ts(dead_new,xlim=c(50,320),main="Autoregression Model")
+points(ar_pred,type='l',col="blue",lwd=3)
+points(ar_pred-ar_se,type='l',col="red",lty=2); points(ar_pred+ar_se,type='l',col="red",lty=2)
+```
+
+Finally we're comparing the actual data of November with that of the predicted region of values.
+```{R}
+plot.ts(dead_new,xlim=c(50,320),main="Autoregression Model")
+points(ar_pred,type='l',col="blue",lwd=3)
+points(ar_pred-ar_se,type='l',col="red",lty=2); points(ar_pred+ar_se,type='l',col="red",lty=2)
+points(nov_data2,type='l')
+```
+
+```{R}
+rm(list=ls(pattern='^conf|^ar|new$|data2$'))
+```

@@ -1,0 +1,84 @@
+---
+title: "COVID-19 TIME SERIES FORECASTING (India)"
+output:
+  word_document: default
+  html_notebook: default
+---
+Objective:
+The objective of this project is to analyse the time-series of SARS-CoV-2/Covid-19 confirmed and death cases and study the trends to forecast expected future trends in India.
+
+The following libraries were used:
+```{r}
+library(dplyr) #data manipulation
+library(forecast) #forecast()
+library(openxlsx) #write.xlsx()
+library(ggplot2)
+```
+
+Raw data is imported and manipulated as per requirements.
+It is ensured that the datatype in the imported file is interpreted exactly as what it was before, or at least what we want it to be interpreted as.
+```{R}
+##working with data
+#importing data
+data.world<-read.csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv",sep = ",",header = T)
+str(data.world)
+```
+
+Raw data is cleaned and only the required variables are retrieved.
+```{R}
+#preprocessing data
+{
+data.india<-data.world %>%
+  filter(location=="India") %>%
+  select(date,new_cases,new_deaths)
+data.india<-read.xlsx("E:/Vineet/work/projects/covid19_forecast/datasets/data_india.xlsx")
+data.india$date<-as.Date(data.india$date)
+n<-nrow(data.india)
+str(data.india)
+}
+
+#new vector: date
+{
+start_date = as.Date("2020-01-30", format = "%Y-%m-%d")
+end_date = as.Date(data.india$date[n], format = "%Y-%m-%d")+15
+forecast_date = seq.Date(from=start_date,to=end_date,by = 1)
+#View(forecast_date)
+}
+```
+
+```{R}
+ggplot(data.india)+
+  geom_area(aes(x=date,y=new_cases),fill="#0088FF")+
+  geom_area(aes(x=date,y=new_deaths),fill="#FF0000",na.rm = TRUE)
+```
+```{R}
+ggplot(data=data.india)+
+  geom_area(aes(x=date,y=new_deaths),fill="#FF0000",na.rm = TRUE)
+```
+
+1. The first model represents ARIMA model for daily new cases.
+
+```{R}
+model.1<-auto.arima(data.india$new_cases); model.1
+model.1.forecast<-forecast(data.india$new_cases,model = model.1,h = 15)
+head(model.1.forecast$mean)
+{ 
+plot(model.1.forecast,xlab="Time(Day)",ylab="Daily Confirmed Cases",xlim=c(365,550),
+     main = cat("Forecasted New Cases till ",end_date))
+abline(h=0)
+}
+```
+The model suggested is ARIMA(3,1,4); 3 parameter for Autoregression, 1 parameter for difference and 4 parameters for Moving Average.
+
+2. The second model represents ARIMA model for daily new deaths.
+
+```{R}
+model.2<-auto.arima(data.india$new_deaths); model.2
+model.2.forecast<-forecast(data.india$new_deaths,model = model.2,h = 15)
+head(model.2.forecast$mean)
+{ 
+plot(model.2.forecast,xlab="Time(Day)",ylab="Daily Deaths",xlim=c(365,550),
+     main = cat("Forecasted New Deaths till ",end_date))
+abline(h=0)
+}
+```

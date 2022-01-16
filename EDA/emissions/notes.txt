@@ -1,0 +1,3 @@
+my_url <- paste0("https://api.v2.emissions-api.org/api/v2/methane/geo.json?point=",lat,"%2C",lng,
+                 "&begin=2019-02-10",
+                 "&end=2019-02-11")
